@@ -38,6 +38,6 @@ API com fastify para gerenciar dietas.
 ---
 
 ## Rotas da aplicação
-- [ ] POST `/users` - Cria um usuário
+- [ ] POST `/user` - Cria um usuário
 - [ ] POST `/diet` - Cria uma refeição
 

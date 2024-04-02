@@ -1,5 +1,8 @@
 import { app } from "./app";
 import { env } from "./env";
+import { dietsRoutes } from "@/routes/diets";
+
+app.register(dietsRoutes);
 
 app
   .listen({
