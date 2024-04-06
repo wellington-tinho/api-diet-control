@@ -67,31 +67,52 @@ export async function dietsRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const getMealBodySchema = z.object({
+      const getMealParamSchema = z.object({
         id: z.string().uuid(),
       });
 
-      const { id } = getMealBodySchema.parse(request.params);
+      const { id } = getMealParamSchema.parse(request.params);
 
       const { sessionId } = request.cookies;
 
-      const diet = await knex("meals")
-        .where({
-          session_id: sessionId,
-          id,
-        })
-        .first();
+      const diet = await knex("meals").where({
+        session_id: sessionId,
+        id,
+      });
 
       return {
-        diet: {
+        diet: diet.map((diet) => ({
           id: diet.id,
           name: diet.name,
           description: diet.description,
           created_at: diet.created_at,
           updated_at: diet.updated_at,
           is_in_the_diet: !!diet.is_in_the_diet,
-        },
+        }))[0],
       };
+    },
+  );
+
+  app.delete(
+    "/:id",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const getMealParamSchema = z.object({
+        id: z.string().uuid(),
+      });
+
+      const { id } = getMealParamSchema.parse(request.params);
+
+      const { sessionId } = request.cookies;
+
+      await knex("meals")
+        .where({
+          session_id: sessionId,
+          id,
+        })
+        .delete();
     },
   );
 }
