@@ -20,7 +20,7 @@ export async function dietsRoutes(app: FastifyInstance) {
           id: diet.id,
           name: diet.name,
           description: diet.description,
-          created_at: diet.created_at,
+          date: diet.date,
           updated_at: diet.updated_at,
           is_in_the_diet: !!diet.is_in_the_diet,
         })),
@@ -85,7 +85,7 @@ export async function dietsRoutes(app: FastifyInstance) {
           id: diet.id,
           name: diet.name,
           description: diet.description,
-          created_at: diet.created_at,
+          date: diet.date,
           updated_at: diet.updated_at,
           is_in_the_diet: !!diet.is_in_the_diet,
         }))[0],
@@ -113,6 +113,52 @@ export async function dietsRoutes(app: FastifyInstance) {
           id,
         })
         .delete();
+    },
+  );
+
+  app.patch(
+    "/:id",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const getMealBodySchema = z
+        .object({
+          name: z.string(),
+          description: z.string(),
+          date: z.date(),
+          isInTheDiet: z.boolean(),
+        })
+        .partial()
+        .refine(
+          (data) => {
+            // Verifica se pelo menos um dos campos está presente
+            return (
+              data.name || data.description || data.date || data.isInTheDiet
+            );
+          },
+          {
+            message: "Você deve fornecer pelo menos um campo para atualizar.",
+          },
+        );
+
+      const getMealParamSchema = z.object({
+        id: z.string().uuid(),
+      });
+
+      const { id } = getMealParamSchema.parse(request.params);
+
+      const { sessionId } = request.cookies;
+
+      await knex("meals")
+        .where({
+          session_id: sessionId,
+          id,
+        })
+        .update({
+          ...getMealBodySchema.parse(request.body),
+          updated_at: knex.fn.now(),
+        });
     },
   );
 }
