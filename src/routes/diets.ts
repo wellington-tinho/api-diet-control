@@ -28,6 +28,49 @@ export async function dietsRoutes(app: FastifyInstance) {
     },
   );
 
+  app.get(
+    "/metrics",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies;
+
+      const diets = await knex("meals").where("session_id", sessionId).select();
+
+      const totalMeals = diets.length;
+      const totalMealsInTheDiet = diets.filter(
+        (diet) => diet.is_in_the_diet,
+      ).length;
+      const totalMealsNotInTheDiet = diets.filter(
+        (diet) => !diet.is_in_the_diet,
+      ).length;
+      const bestSequence = diets.reduce(
+        (acc, diet) => {
+          if (diet.is_in_the_diet) {
+            acc.currentSequence += 1;
+            acc.bestSequence = Math.max(acc.bestSequence, acc.currentSequence);
+          } else {
+            acc.currentSequence = 0;
+          }
+          return acc;
+        },
+        {
+          bestSequence: 0,
+          currentSequence: 0,
+        },
+      );
+      return {
+        metrics: {
+          totalMeals,
+          totalMealsInTheDiet,
+          totalMealsNotInTheDiet,
+          bestSequence: bestSequence.bestSequence,
+        },
+      };
+    },
+  );
+
   app.post("/", async (request, reply) => {
     const createMealBodySchema = z.object({
       name: z.string(),
@@ -121,7 +164,7 @@ export async function dietsRoutes(app: FastifyInstance) {
     {
       preHandler: [checkSessionIdExists],
     },
-    async (request, reply) => {
+    async (request) => {
       const getMealBodySchema = z
         .object({
           name: z.string(),
