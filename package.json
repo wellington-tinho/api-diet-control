@@ -8,7 +8,8 @@
     "start": "node build/server.js",
     "build": "tsup src/server.ts --out-dir build --minify",
     "lint": "eslint src --ext .ts --fix",
-    "knex": "node --import tsx ./node_modules/knex/bin/cli.js"
+    "knex": "node --import tsx ./node_modules/knex/bin/cli.js",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -16,10 +17,13 @@
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.2.2",
     "@types/node": "^20.11.30",
+    "@types/supertest": "6.0.2",
     "eslint": "^8.57.0",
+    "supertest": "6.3.4",
     "tsup": "^8.0.2",
     "tsx": "^4.7.1",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "vitest": "1.4.0"
   },
   "dependencies": {
     "@fastify/cookie": "9.3.1",
